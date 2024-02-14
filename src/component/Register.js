@@ -1,173 +1,219 @@
-import React, { useState } from 'react';
-import {
-  MDBContainer,
-  MDBTabs,
-  MDBTabsItem,
-  MDBTabsLink,
-  MDBTabsContent,
-  MDBTabsPane,
-  MDBBtn,
-  MDBIcon,
-  MDBInput,
-  MDBCheckbox
-}
-from 'mdb-react-ui-kit';
+import React, { useState } from 'react'
 import Header from './Header'
+import NavbarConponent from './NavbarComponent'
 import Menu from './Menu'
-import { FaFacebook, FaGoogle,FaGithub,FaTwitter    } from "react-icons/fa";
-import Form from 'react-bootstrap/Form';
-import FooterComponent from './FooterComponent';
-import { Link } from 'react-router-dom';
+import FooterComponent from './FooterComponent'
 
 const Register = () => {
-    const [justifyActive, setJustifyActive] = useState('tab2');
+  const [userName, setUserName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [canSubmit, setCanSubmit] = useState(true);
+  const [passWord, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-  const handleJustifyClick = (value: string) => {
-    if (value === justifyActive) {
-      return;
+  const handleUserNameChange = (event) => {
+    const { value } = event.target;
+    setUserName(value);
+  };
+  const handlePhoneNumberChange = (event) => {
+    const { value } = event.target;
+    setPhoneNumber(value);
+
+    // Kiểm tra số điện thoại có đúng định dạng không
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(value)) {
+      setPhoneNumberError('Số điện thoại không hợp lệ');
+      setCanSubmit(false);
+    } else {
+      setPhoneNumberError('');
+      setCanSubmit(true);
     }
+  };
+  const handleEmailChange = (event) => {
+    const { value } = event.target;
+    setEmail(value);
 
-    setJustifyActive(value);
+    // Kiểm tra email có đúng định dạng không
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Email không hợp lệ');
+      setCanSubmit(false);
+    } else {
+      setEmailError('');
+      setCanSubmit(true);
+    }
+  };
+  //password
+  const handlePasswordChange = (event) => {
+    const { value } = event.target;
+    setPassword(value);
+
+    // Kiểm tra mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất một chữ cái
+    const passwordRegex = /^(?=.*[A-Za-z]).{8,}$/;
+    if (!passwordRegex.test(value)) {
+      setPasswordError('Mật khẩu phải chứa ít nhất 8 ký tự và ít nhất một chữ cái');
+      setCanSubmit(false);
+    } else {
+      setPasswordError('');
+      setCanSubmit(true);
+    }
   };
 
-  
+  //ConfirmPassword
+  const handleConfirmPasswordChange = (event) => {
+    const { value } = event.target;
+    setConfirmPassword(value);
+
+    if (value !== passWord) {
+      setConfirmPasswordError('Mật khẩu nhập lại không trùng khớp');
+      setCanSubmit(false);
+    } else {
+      setConfirmPasswordError('');
+      setCanSubmit(true);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Xử lý khi nhấn nút submit
+    if (canSubmit) {
+      // Gửi dữ liệu đăng ký đến API
+      try {
+        const response = await fetch('http://localhost:8080/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userName,
+            phoneNumber,
+            email,
+            passWord,
+            status: 1,
+            typeID: 1,
+          }),
+        });
+
+        if (response.ok) {
+          const responseData = await response.json(); // Chuyển đổi phản hồi thành đối tượng JavaScript
+          console.log('Đăng ký thành công!');
+          console.log('Thông tin người dùng:', responseData);
+        } else {
+          console.error('Đăng ký thất bại!');
+        }
+      } catch (error) {
+        console.error('Đã xảy ra lỗi:', error);
+      }
+    } else {
+      console.log('Vui lòng nhập đúng thông tin');
+    }
+  };
+
+
+
   return (
     <div>
-        <Header/>
-        <Menu/>
-        <div style={styles.container}>
-            <MDBContainer className="p-3 my-5 d-flex flex-column w-50" >
-            <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
-            <MDBTabsItem>
-            <Link to="/login" style={{textDecoration: 'none'}}>
-      <MDBTabsLink onClick={() => handleJustifyClick('tab1')} active={justifyActive === 'tab1'} 
-         style={{ backgroundColor: justifyActive === 'tab1' ? '#FEAFA2' : 'rgba(204, 204, 204, 0.4)', color:justifyActive === 'tab1' ? 'white' : 'black' }}
-      >
-        Đăng nhập
-      </MDBTabsLink>
-      </Link>
-    </MDBTabsItem>
-  
-    <MDBTabsItem>
-    <Link to="/register" style={{textDecoration: 'none'}}>
-      <MDBTabsLink onClick={() => handleJustifyClick('tab2')} active={justifyActive === 'tab2'} activeColor="#FEAFA2"
-      style={{ backgroundColor: justifyActive === 'tab2' ? '#FEAFA2' : 'rgba(204, 204, 204, 0.4)', color:justifyActive === 'tab2' ? 'white' : 'black' }}
-      >
-        Đăng ký
-      </MDBTabsLink>
-      </Link>
-    </MDBTabsItem>
-    
-      </MDBTabs>
+      <Header />
+      <div style={{ paddingBottom: '10px' }}>
+        <Menu />
+      </div>
+      <div className="container" style={styles.container}>
+        <div className="row justify-content-center">
+          <div className="col-sm-6">
+            <div className="card">
+              <h2 className='text-center' style={{ color: '#FEAFA2' }}>Đăng ký</h2>
+              <div className="card-body">
+                <form onSubmit={handleSubmit}>
+                  <div className="form-group mb-3">
+                    <label>Họ và Tên</label>
+                    <input
+                      type="text"
+                      className="form-control"
 
-      <MDBTabsContent>
-        <MDBTabsPane open={justifyActive === 'tab1'}>
+                      value={userName}
+                      onChange={handleUserNameChange}
+                      placeholder="Nhập Họ & Tên"
+                    />
 
-        <div className="text-center mb-3">
-            <p>Đăng nhập bằng:</p>
+                  </div>
 
-            <div className='d-flex justify-content-between mx-auto' style={{width: '40%'}}>
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: '#0863f7' }}>
-               <FaFacebook style={styles.Icon}/>
-              </MDBBtn>
+                  <div className="form-group mb-3">
+                    <label>Số điện thoại</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={phoneNumber}
+                      onChange={handlePhoneNumberChange}
+                      placeholder="Nhập Số điện thoại"
+                    />
+                    {phoneNumberError &&
+                      <small className=" text-danger">
+                        {phoneNumberError}
+                      </small>
+                    }
+                  </div>
 
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: '#FEAFA2' }}>
-                <FaGoogle style={styles.Icon} />
-              </MDBBtn>
-
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: '#1d9bf0' }}>
-               <FaTwitter style={styles.Icon} />
-              </MDBBtn>
-
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: 'black' }}>
-                <FaGithub style={styles.Icon} />
-              </MDBBtn>
+                  <div className="form-group mb-3">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={email}
+                      onChange={handleEmailChange}
+                      placeholder="Nhập Email"
+                    />
+                    {emailError && <small className="text-danger">{emailError}</small>}
+                  </div>
+                  <div className="form-group mb-3">
+                    <label>Mật khẩu</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={passWord}
+                      onChange={handlePasswordChange}
+                      placeholder="Nhập mật khẩu"
+                    />
+                    {passwordError && <small className="text-danger">{passwordError}</small>}
+                  </div>
+                  <div className="form-group mb-3">
+                    <label>Nhập lại mật khẩu</label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      value={confirmPassword}
+                      onChange={handleConfirmPasswordChange}
+                      placeholder="Nhập lại mật khẩu"
+                    />
+                    {confirmPasswordError && <div className="text-danger">{confirmPasswordError}</div>}
+                  </div>
+                  <div className="form-check mb-3">
+                    <input type="checkbox" className="form-check-input" id="exampleCheck1" />
+                    <label className="form-check-label mb-3" >Check me out</label>
+                  </div>
+                  <button type="submit" className="btn btn-primary w-100" style={{ backgroundColor: '#FEAFA2', border: 'none' }} disabled={!canSubmit}>
+                    Đăng ký
+                  </button>
+                </form>
+              </div>
             </div>
-
-            <p className="text-center mt-3">Hoặc:</p>
           </div>
-
-          <MDBInput wrapperClass='mb-4' label='Email' id='form1' type='email'/>
-
-          <MDBInput wrapperClass='mb-4' label='Password' id='form2' type='password'/>
-
-          <div className="d-flex justify-content-between mx-4 mb-4">
-            <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Nhớ mật khẩu' />
-            <a style={styles.forget}>Quên mật khẩu?</a>
-          </div>
-
-          <MDBBtn className="mb-4 w-100" style={{backgroundColor: '#FEAFA2', border: 'none'}}>Đăng Nhập</MDBBtn>
-          <p className="text-center">Chưa có tài khoản? <a style={styles.forget}>Đăng ký</a></p>
-        </MDBTabsPane>
-
-        {/* tab2 */}
-        <MDBTabsPane open={justifyActive === 'tab2'}>
-        <div className="text-center mb-3">
-            <p>Đăng nhập bằng:</p>
-
-            <div className='d-flex justify-content-between mx-auto' style={{width: '40%'}}>
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: '#0863f7' }}>
-               <FaFacebook style={styles.Icon}/>
-              </MDBBtn>
-
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: '#FEAFA2' }}>
-                <FaGoogle style={styles.Icon} />
-              </MDBBtn>
-
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: '#1d9bf0' }}>
-               <FaTwitter style={styles.Icon} />
-              </MDBBtn>
-
-              <MDBBtn tag='a' color='none' className='m-1' style={{ color: 'black' }}>
-                <FaGithub style={styles.Icon} />
-              </MDBBtn>
-            </div>
-
-            <p className="text-center mt-3">Hoặc:</p>
-          </div>
-
-          <MDBInput wrapperClass='mb-4' label='Họ và Tên' id='form1' type='text'/>
-          <MDBInput wrapperClass='mb-4' label='Số điện thoại' id='form1' type='text'/>
-          <MDBInput wrapperClass='mb-4' label='Email' id='form1' type='email'/>
-          <MDBInput wrapperClass='mb-4' label='Password' id='form1' type='password'/>
-
-          <div className='d-flex justify-content-center mb-4'>
-            <MDBCheckbox name='flexCheck' id='flexCheckDefault' label='Tôi đã đọc và đồng ý với các điều khoản' />
-          </div>
-
-          <MDBBtn className="mb-4 w-100" style={{backgroundColor: '#FEAFA2', border: 'none'}}>Đăng ký</MDBBtn>
-        </MDBTabsPane>
-      
-        {/* tab2 */}
-      </MDBTabsContent>
-            </MDBContainer>
-    
-            
         </div>
-
-
-        <FooterComponent/>
+      </div>
+      <FooterComponent />
     </div>
   )
 }
 const styles = {
-    Icon: {
-        fontSize: '50px',
-    },
-    container: {
-        fontFamily: 'Montserrat',
-    
-    
-      },
-      customActiveTab: {
-        backgroundColor: 'red !important', // Thay đổi màu nền của tab được chọn thành màu đỏ
-        color : 'white !important',
-      },
-      forget: {
-        color: '#ae2214',
-        cursor: 'pointer',
-        
-      }
+  container: {
+    fontFamily: 'Montserrat',
+
+
+  },
 }
 
 export default Register
