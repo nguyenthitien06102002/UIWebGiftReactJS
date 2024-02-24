@@ -86,13 +86,14 @@ const NavbarConponent = () => {
       </Link>
       {/* giỏ hàng */}
       <div className="dropdown">
-        <a  onMouseEnter={() => setIconColor({ shoppingCart: '#FEAFA2' })}
+        <Link to="/cart" 
+         onMouseEnter={() => setIconColor({ shoppingCart: '#FEAFA2' })}
         onMouseLeave={() => setIconColor({})}>
           <FaShoppingCart style={{ fontSize: '30px', color: iconColor.shoppingCart || 'black', cursor: 'pointer' }} />
           <span className="badge rounded-pill badge-notification bg-danger position-absolute top-0 start-100 translate-middle">
             1
           </span>
-        </a>
+        </Link>
       </div>
     </div>
         {/* Right elements */}
